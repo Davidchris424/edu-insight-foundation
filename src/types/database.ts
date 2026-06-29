@@ -83,6 +83,7 @@ export interface Score {
   id: string;
   school_id: string;
   student_id: string;
+  teacher_id: string;
   subject_id: string;
   term_id: string;
   class_id: string;

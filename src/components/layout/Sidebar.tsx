@@ -11,6 +11,7 @@ import {
   School,
   FileText,
   CreditCard,
+  PenLine,
   AlertCircle
 } from 'lucide-react';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -73,6 +74,12 @@ const navItems: NavItem[] = [
     href: '/scores',
     icon: ShieldCheck,
     roles: ['SCHOOL_ADMIN', 'TEACHER'],
+  },
+  {
+    title: 'Result Entry',
+    href: '/result-entry',
+    icon: PenLine,
+    roles: ['TEACHER'],
   },
   {
     title: 'Payments',

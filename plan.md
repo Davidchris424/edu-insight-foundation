@@ -1,61 +1,57 @@
-# EduInsight - Student Performance Intelligence Platform Foundation
+# EduInsight - Teacher Result Entry Module Implementation
 
-Building the foundation for a production-ready SaaS application for student performance analytics.
+Extension of the EduInsight platform to allow teachers to enter and manage student scores.
 
 ## Scope Summary
-- Scalable database schema design (multi-tenant)
-- Secure authentication framework with RBAC (Super Admin, School Owner, Administrator, Teacher)
-- Multi-tenancy isolation logic via `School_ID`
-- Modern dashboard layout architecture
-- Reusable folder structure and base components
+- Implementation of a "Teacher Result Entry" page.
+- Selection flows for Session, Term, Class, Subject, and Student.
+- Score entry interface with automatic validation.
+- Integration with the existing `localStorage` storage service.
+- Multi-tenancy enforcement (linking scores to `School_ID`, `Teacher_ID`, etc.).
 
 ## Non-Goals
-- Implementation of actual analytics/charts
-- Payment system implementation
-- AI features
-- Full CRUD for all tables (foundation only)
-- Real-time notifications
+- Real-time collaborative grading.
+- Bulk CSV/Excel score upload (can be a future phase).
+- Report card generation/PDF export (out of scope for result entry).
 
 ## Assumptions
-- The application is a React SPA using Vite.
-- Persistence will be simulated via `localStorage` or a mock state for this foundation phase, but the schema will be designed to be Postgres-ready.
-- Multi-tenancy will be enforced at the data-access layer.
+- The application continues to use `localStorage` via `storageService`.
+- Teachers are already associated with specific classes/subjects in the mock data or via the UI.
+- The `Score` type in `src/types/database.ts` is the source of truth for the data structure.
 
 ## Affected Areas
-- `src/types/`: Database and domain models
-- `src/store/`: Auth and multi-tenancy state management
-- `src/components/layout/`: Dashboard shell and navigation
-- `src/lib/`: Multi-tenant filtering and auth utilities
-- `src/hooks/`: Data fetching hooks with automatic filtering
+- `src/pages/ResultEntry.tsx`: New page for score entry.
+- `src/services/storage.ts`: Add `updateScore` or `addScore` methods if needed (generic `addItem` exists).
+- `src/components/layout/Sidebar.tsx`: Add "Result Entry" navigation item for teachers.
+- `src/App.tsx`: Register the new route.
 
 ## Phases
 
-### Phase 1: Architecture & Type Definitions
-- Establish the folder structure (`components/`, `hooks/`, `lib/`, `services/`, `store/`, `types/`).
-- Define TypeScript interfaces for all database entities:
-  - `School`, `User`, `Teacher`, `Student`, `Class`, `Subject`, `AcademicSession`, `Term`, `Score`, `Payment`, `InterventionLog`.
-- Define `UserRole` enum and `Session` interface.
+### Phase 1: Storage Service Enhancements
+- Update `src/services/storage.ts` to include specific methods for fetching sessions, terms, classes, and subjects filtered by the current context if necessary (though generic getters exist).
+- Ensure `addItem` and a new `updateItem` (or similar) are available for scores.
 - **Owner:** `frontend_engineer`
 
-### Phase 2: Multi-Tenant Auth Store
-- Implement a mock authentication service.
-- Create a global store (using Zustand or simple Context) to hold:
-    - `user`: Current logged-in user details.
-    - `schoolId`: The active tenant ID.
-    - `role`: The user's role for RBAC.
-    - `assignedClassId`: Specific to Teachers.
+### Phase 2: Result Entry UI Development
+- Create `src/pages/ResultEntry.tsx`.
+- Implement selection dropdowns for:
+    - Session (AcademicSession)
+    - Term
+    - Class
+    - Subject
+- Implement a student list/table where scores can be entered for the selected filters.
 - **Owner:** `frontend_engineer`
 
-### Phase 3: Modern Dashboard Shell (UI Foundation)
-- Design a responsive Sidebar/Navbar layout using Shadcn UI components.
-- Implement Role-Based Navigation:
-    - Sidebar items visible based on `user.role`.
-- Create placeholder views for "Dashboard", "Students", "Classes", and "Settings".
+### Phase 3: Validation & Persistence
+- Implement score range validation (e.g., CA 0-40, Exam 0-60).
+- Automatic calculation of `total_score`.
+- Grade calculation logic (based on standard scale).
+- Save/Update logic to `storageService`.
 - **Owner:** `frontend_engineer`
 
-### Phase 4: Data Layer Utilities
-- Create a helper utility/hook `useFilteredData` that automatically applies `schoolId` to any data operation.
-- Implement basic mock services for fetching data that respect the `schoolId` filter.
+### Phase 4: Integration & Navigation
+- Add the "Result Entry" route to `src/App.tsx`.
+- Update `src/components/layout/Sidebar.tsx` to include the link for users with the `TEACHER` role.
 - **Owner:** `frontend_engineer`
 
 ## Execution Handoff
@@ -63,22 +59,21 @@ Building the foundation for a production-ready SaaS application for student perf
 **Plan status:** ready
 
 **Dispatch order:**
-1. frontend_engineer — Implementation of types, auth state, layout, and multi-tenant utilities.
+1. frontend_engineer — Implementation of the Result Entry module and integration.
 
 **Per-agent instructions:**
 ### 1. frontend_engineer
 - **Phases:** 1, 2, 3, 4
-- **Scope:** Build the entire structural foundation including types, global state for multi-tenancy, and the dashboard layout.
+- **Scope:** Build the teacher result entry module using the existing `localStorage` architecture.
 - **Files:** 
-    - `src/types/database.ts` (Entity definitions)
-    - `src/store/useAuthStore.ts` (Auth and tenant state)
-    - `src/components/layout/DashboardLayout.tsx` (Main shell)
-    - `src/components/layout/Sidebar.tsx` (RBAC navigation)
-    - `src/lib/multi-tenancy.ts` (Filtering logic)
+    - `src/pages/ResultEntry.tsx` (New)
+    - `src/services/storage.ts` (Update for save/update logic)
+    - `src/components/layout/Sidebar.tsx` (Navigation update)
+    - `src/App.tsx` (Route registration)
 - **Depends on:** none
 - **Acceptance criteria:**
-    - App starts and shows a login/dashboard entry point.
-    - TypeScript types cover all requested tables.
-    - Changing the `schoolId` in the store would theoretically filter data.
-    - Sidebar items change based on the assigned role in the mock state.
-    - Layout is responsive and follows modern SaaS patterns.
+    - Teachers can navigate to "Result Entry".
+    - Dropdowns correctly list Sessions, Terms, Classes, and Subjects.
+    - Score entry validates ranges and calculates totals/grades.
+    - Saving persistence works (verified by reloading or checking `localStorage`).
+    - Data is correctly tagged with `school_id`, `student_id`, `subject_id`, etc.

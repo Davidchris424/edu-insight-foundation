@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useFilteredData } from '@/hooks/use-filtered-data';
-import { MOCK_STUDENTS } from '@/services/mock-data';
+import { storageService } from '@/services/storage';
 import { 
   Card, 
   CardContent, 
@@ -18,10 +18,16 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Student } from '@/types/database';
 
 export default function Dashboard() {
   const { user, schoolId } = useAuthStore();
-  const students = useFilteredData(MOCK_STUDENTS);
+  const [allStudents, setAllStudents] = useState<Student[]>([]);
+  const students = useFilteredData(allStudents);
+
+  useEffect(() => {
+    setAllStudents(storageService.getStudents());
+  }, []);
 
   return (
     <div className="space-y-8">
@@ -44,7 +50,6 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">Filtered by school isolation</p>
           </CardContent>
         </Card>
-        {/* More cards could go here */}
       </div>
 
       <Card>
